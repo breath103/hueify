@@ -98,41 +98,59 @@ class Lights extends Component {
    * @return {JSX}
    */
   renderListItem (light) {
-    const rgb = convertXYtoRGB(...light.state.xy, light.state.bri)
-
-    const gradient = {
-      background: `linear-gradient(90deg, transparent, rgb(${rgb.join(',')}))`,
-      opacity: (light.state.bri / 255)
+    if (!light.state.reachable) {
+      return (
+        <li>Not Reachable {light.name}</li>
+      )
     }
 
-    return (
-      <li key={light.id} className='fixed-height'>
-        <span
-          onClick={this.toggleColorWheel.bind(this, light)}
-          className='color'
-          style={light.state.on ? gradient : {}}
-        />
-        <span className='control'>
-          <span>
-            <Toggle
-              style={{ marginRight: '10px' }}
-              checked={light.state.on}
-              onClick={this.toggleLight.bind(this, light)}
+    switch (light.type) {
+      case 'Extended color light':
+        const rgb = convertXYtoRGB(...light.state.xy, light.state.bri)
+        const gradient = {
+          background: `linear-gradient(90deg, transparent, rgb(${rgb.join(',')}))`,
+          opacity: (light.state.bri / 255)
+        }
+
+        return (
+          <li key={light.id} className='fixed-height'>
+            <span
+              onClick={this.toggleColorWheel.bind(this, light)}
+              className='color'
+              style={light.state.on ? gradient : {}}
             />
-            <span onClick={this.toggleColorWheel.bind(this, light)}>
-              {light.name}
+            <span className='control'>
+              <span>
+                <Toggle
+                  style={{ marginRight: '10px' }}
+                  checked={light.state.on}
+                  onClick={this.toggleLight.bind(this, light)}
+                />
+                <span onClick={this.toggleColorWheel.bind(this, light)}>
+                  {light.name}
+                </span>
+              </span>
+              <Slider
+                min='0'
+                max='255'
+                disabled={!light.state.on}
+                defaultValue={light.state.bri}
+                onInput={debounce(this.setLightBrightness.bind(this, light), 200)}
+              />
             </span>
-          </span>
-          <Slider
-            min='0'
-            max='255'
-            disabled={!light.state.on}
-            defaultValue={light.state.bri}
-            onInput={debounce(this.setLightBrightness.bind(this, light), 200)}
-          />
-        </span>
-      </li>
-    )
+          </li>
+        )
+      case 'Dimmable light':
+        return (
+          <li key={light.id} className='fixed-height'>
+            <span className='control' />
+          </li>
+        )
+      default:
+        return (
+          <li>Not supported {light.type}</li>
+        )
+    }
   }
 }
 
