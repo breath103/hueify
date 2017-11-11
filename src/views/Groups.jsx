@@ -100,45 +100,49 @@ class Groups extends Component {
    * @private
    */
   renderListItem (group) {
-    if (group.id === '0') {
-      return null
-    }
+    try {
+      const rgb = convertXYtoRGB(...group.action.xy, group.action.bri)
 
-    const rgb = convertXYtoRGB(...group.action.xy, group.action.bri)
+      const gradient = {
+        background: `linear-gradient(90deg, transparent, rgb(${rgb.join(',')}))`,
+        opacity: (group.action.bri / 255)
+      }
 
-    const gradient = {
-      background: `linear-gradient(90deg, transparent, rgb(${rgb.join(',')}))`,
-      opacity: (group.action.bri / 255)
-    }
-
-    return (
-      <li key={group.id} className='fixed-height'>
-        <span
-          onClick={this.toggleColorWheel.bind(this, group)}
-          className='color'
-          style={group.action.on ? gradient : {}}
-        />
-        <span className='control'>
-          <span>
-            <Toggle
-              style={{ marginRight: '10px' }}
-              checked={group.action.on}
-              onClick={this.toggleLights.bind(this, group)}
-            />
-            <span onClick={this.toggleColorWheel.bind(this, group)}>
-              {group.name}
-            </span>
-          </span>
-          <Slider
-            min='0'
-            max='255'
-            disabled={!group.action.on}
-            defaultValue={group.action.bri}
-            onInput={debounce(this.setGroupBrightness.bind(this, group), 200)}
+      return (
+        <li key={group.id} className='fixed-height'>
+          <span
+            onClick={this.toggleColorWheel.bind(this, group)}
+            className='color'
+            style={group.action.on ? gradient : {}}
           />
-        </span>
-      </li>
-    )
+          <span className='control'>
+            <span>
+              <Toggle
+                style={{ marginRight: '10px' }}
+                checked={group.action.on}
+                onClick={this.toggleLights.bind(this, group)}
+              />
+              <span onClick={this.toggleColorWheel.bind(this, group)}>
+                {group.name}
+              </span>
+            </span>
+            <Slider
+              min='0'
+              max='255'
+              disabled={!group.action.on}
+              defaultValue={group.action.bri}
+              onInput={debounce(this.setGroupBrightness.bind(this, group), 200)}
+            />
+          </span>
+        </li>
+      )
+    } catch (e) {
+      return (
+        <li key={group.id} className='fixed-height'>
+          { group.name }
+        </li>
+      );
+    }
   }
 }
 
